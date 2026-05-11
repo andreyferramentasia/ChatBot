@@ -4,13 +4,13 @@ from transformers import pipeline
 if "pipe" not in st.session_state:
     with st.spinner("Carregando modelo...", show_time=True):
         st.session_state.pipe = pipeline(
-            model="facebook/bart-large-mnli", device=0)
+            model="facebook/bart-large-mnli", device=-1)
     st.toast("Modelo carregado com sucesso!", icon="✅")
     st.balloons()
 
 pipe = st.session_state.pipe
 
-st.title("Assistente Virtual de calouros")
+st.title("Assistente Virtual para calouros")
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
@@ -25,7 +25,7 @@ with st.container(border=True):
 
     if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
-        st.chat_message("user").write(prompt)
+        st.chat_message("user",avatar="icon.jpg",width="content").write(prompt)
 
         resultado = pipe(prompt, candidate_labels=[
                          "Matricula", "secretaria", "coordenação", "notas"])
@@ -38,9 +38,8 @@ with st.container(border=True):
             "secretaria": "A secretaria funciona de segunda a sexta das 8h às 18h.",
             "coordenação": "Para falar com a coordenação, envie um e-mail ou vá ao bloco X.",
         }
-
         resposta = respostas.get(categoria, "Não entendi, pode reformular?")
         st.session_state.messages.append(
             {"role": "assistant", "content": f"{resposta} (Confiança: {score:.0%})"})
-        st.chat_message("assistant").write(
+        st.chat_message("assistant", avatar="icon.jpg").write(
             f"{resposta} (Confiança: {score:.0%})")
