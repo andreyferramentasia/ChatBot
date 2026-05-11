@@ -2,7 +2,11 @@ import streamlit as st
 from transformers import pipeline
 
 if "pipe" not in st.session_state:
-    st.session_state.pipe = pipeline(model="facebook/bart-large-mnli")
+    with st.spinner("Carregando modelo...", show_time=True):
+        st.session_state.pipe = pipeline(
+            model="facebook/bart-large-mnli", device=0)
+    st.toast("Modelo carregado com sucesso!", icon="✅")
+    st.balloons()
 
 pipe = st.session_state.pipe
 
@@ -23,7 +27,8 @@ with st.container(border=True):
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
 
-        resultado = pipe(prompt, candidate_labels=["Matricula", "secretaria", "coordenação", "notas"])
+        resultado = pipe(prompt, candidate_labels=[
+                         "Matricula", "secretaria", "coordenação", "notas"])
         categoria = resultado["labels"][0]
         score = resultado["scores"][0]
 
@@ -35,6 +40,7 @@ with st.container(border=True):
         }
 
         resposta = respostas.get(categoria, "Não entendi, pode reformular?")
-        st.session_state.messages.append({"role": "assistant", "content": f"{resposta} (Confiança: {score:.2f})"})
-        st.chat_message("assistant").write(f"{resposta} (Confiança: {score:.2f})")
-
+        st.session_state.messages.append(
+            {"role": "assistant", "content": f"{resposta} (Confiança: {score:.0%})"})
+        st.chat_message("assistant").write(
+            f"{resposta} (Confiança: {score:.0%})")
